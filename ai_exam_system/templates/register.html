@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Register - AI Exam System{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <!-- Header -->
+        <div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Create your account
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Already have an account?
+                <a href="{{ url_for('auth.login') }}" class="font-medium text-indigo-600 hover:text-indigo-500">
+                    Sign in
+                </a>
+            </p>
+        </div>
+
+        <!-- Registration Form -->
+        <form class="mt-8 space-y-6" action="{{ url_for('auth.register') }}" method="POST" id="registerForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="rounded-md shadow-sm -space-y-px">
+                <!-- Username Field -->
+                <div>
+                    <label for="username" class="sr-only">Username</label>
+                    <input id="username" name="username" type="text" required
+                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                           placeholder="Username">
+                    <p id="usernameError" class="mt-1 text-sm text-red-600 hidden"></p>
+                </div>
+
+                <!-- Email Field -->
+                <div>
+                    <label for="email" class="sr-only">Email address</label>
+                    <input id="email" name="email" type="email" required
+                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                           placeholder="Email address">
+                    <p id="emailError" class="mt-1 text-sm text-red-600 hidden"></p>
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    <label for="password" class="sr-only">Password</label>
+                    <input id="password" name="password" type="password" required
+                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                           placeholder="Password">
+                    <p id="passwordError" class="mt-1 text-sm text-red-600 hidden"></p>
+                </div>
+
+                <!-- Confirm Password Field -->
+                <div>
+                    <label for="confirm_password" class="sr-only">Confirm Password</label>
+                    <input id="confirm_password" name="confirm_password" type="password" required
+                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                           placeholder="Confirm Password">
+                    <p id="confirmPasswordError" class="mt-1 text-sm text-red-600 hidden"></p>
+                </div>
+            </div>
+
+            <!-- Password Requirements -->
+            <div class="rounded-md bg-gray-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-gray-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-gray-800">Password requirements:</h3>
+                        <div class="mt-2 text-sm text-gray-600">
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li id="lengthCheck" class="text-red-500">At least 8 characters long</li>
+                                <li id="numberCheck" class="text-red-500">Contains at least one number</li>
+                                <li id="upperCheck" class="text-red-500">Contains at least one uppercase letter</li>
+                                <li id="lowerCheck" class="text-red-500">Contains at least one lowercase letter</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message Container -->
+            <div id="errorMessage" class="hidden rounded-md bg-red-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-circle text-red-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-red-800" id="errorText"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div>
+                <button type="submit" id="submitButton"
+                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                        <i class="fas fa-user-plus text-indigo-500 group-hover:text-indigo-400"></i>
+                    </span>
+                    Create Account
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Password validation functions
+function validatePassword(password) {
+    const checks = {
+        length: password.length >= 8,
+        number: /\d/.test(password),
+        upper: /[A-Z]/.test(password),
+        lower: /[a-z]/.test(password)
+    };
+
+    // Update requirement checks
+    document.getElementById('lengthCheck').className = checks.length ? 'text-green-500' : 'text-red-500';
+    document.getElementById('numberCheck').className = checks.number ? 'text-green-500' : 'text-red-500';
+    document.getElementById('upperCheck').className = checks.upper ? 'text-green-500' : 'text-red-500';
+    document.getElementById('lowerCheck').className = checks.lower ? 'text-green-500' : 'text-red-500';
+
+    return Object.values(checks).every(check => check);
+}
+
+// Form validation
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Reset error messages
+    const errorFields = ['username', 'email', 'password', 'confirmPassword'];
+    errorFields.forEach(field => {
+        document.getElementById(`${field}Error`)?.classList.add('hidden');
+    });
+    document.getElementById('errorMessage').classList.add('hidden');
+
+    // Get form values
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+
+    // Validate password match
+    if (password !== confirmPassword) {
+        document.getElementById('confirmPasswordError').textContent = 'Passwords do not match';
+        document.getElementById('confirmPasswordError').classList.remove('hidden');
+        return;
+    }
+
+    // Validate password requirements
+    if (!validatePassword(password)) {
+        document.getElementById('passwordError').textContent = 'Password does not meet requirements';
+        document.getElementById('passwordError').classList.remove('hidden');
+        return;
+    }
+
+    try {
+        const response = await fetch("{{ url_for('auth.register') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: username,
+                email: email,
+                password: password
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Redirect to login page on successful registration
+            window.location.href = "{{ url_for('auth.login') }}";
+        } else {
+            // Display error message
+            const errorText = document.getElementById('errorText');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            errorText.textContent = data.message || 'An error occurred during registration';
+            errorMessage.classList.remove('hidden');
+
+            // Show field-specific errors if available
+            if (data.errors) {
+                Object.entries(data.errors).forEach(([field, message]) => {
+                    const errorElement = document.getElementById(`${field}Error`);
+                    if (errorElement) {
+                        errorElement.textContent = message;
+                        errorElement.classList.remove('hidden');
+                    }
+                });
+            }
+        }
+    } catch (error) {
+        const errorText = document.getElementById('errorText');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        errorText.textContent = 'An error occurred. Please try again.';
+        errorMessage.classList.remove('hidden');
+    }
+});
+
+// Real-time password validation
+document.getElementById('password').addEventListener('input', (e) => {
+    validatePassword(e.target.value);
+});
+
+// Real-time password match validation
+document.getElementById('confirm_password').addEventListener('input', (e) => {
+    const password = document.getElementById('password').value;
+    const confirmError = document.getElementById('confirmPasswordError');
+    
+    if (e.target.value && e.target.value !== password) {
+        confirmError.textContent = 'Passwords do not match';
+        confirmError.classList.remove('hidden');
+    } else {
+        confirmError.classList.add('hidden');
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}
